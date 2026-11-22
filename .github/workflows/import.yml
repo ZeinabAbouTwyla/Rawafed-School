@@ -18,12 +18,13 @@ jobs:
       - name: Extract and stage site files
         run: |
           set -e
-          mkdir -p /tmp/import/x
-          unzip -o /tmp/import/* -d /tmp/import/x
-          if [ -z "$(find /tmp/import/x -mindepth 1 -maxdepth 1 -type f -print -quit)" ] && [ "$(find /tmp/import/x -mindepth 1 -maxdepth 1 -type d | wc -l)" = "1" ]; then
-            SRC=$(find /tmp/import/x -mindepth 1 -maxdepth 1 -type d)
+          mkdir -p /tmp/extract
+          ZIP=$(find /tmp/import -maxdepth 1 -type f | head -1)
+          unzip -o "$ZIP" -d /tmp/extract
+          if [ -z "$(find /tmp/extract -mindepth 1 -maxdepth 1 -type f -print -quit)" ] && [ "$(find /tmp/extract -mindepth 1 -maxdepth 1 -type d | wc -l)" = "1" ]; then
+            SRC=$(find /tmp/extract -mindepth 1 -maxdepth 1 -type d)
           else
-            SRC=/tmp/import/x
+            SRC=/tmp/extract
           fi
           cp -r "$SRC"/. .
       - name: Commit site files
