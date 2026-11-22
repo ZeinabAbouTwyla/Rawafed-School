@@ -40,7 +40,7 @@ p{margin:0 0 1em}
 .site-header{position:sticky;top:0;z-index:50;background:var(--bg);border-bottom:1px solid var(--line);
   transition:transform .25s ease}
 .site-header.is-hidden{transform:translateY(-100%)}
-.site-header:focus-within,body.nav-open .site-header{transform:none}
+.site-header:has(:focus-visible),body.nav-open .site-header{transform:none}
 .header-in.wrap{max-width:1440px}
 .header-cta{white-space:nowrap;flex:none;line-height:1.5}
 .header-in{display:flex;align-items:center;gap:14px;padding-block:.65rem;min-height:72px}
