@@ -57,7 +57,7 @@
   function updateHeader() {
     var y = Math.max(0, window.scrollY);
     var delta = y - scrollAnchor;
-    var keepVisible = y <= header.offsetHeight + 12 || document.body.classList.contains('nav-open') || header.contains(document.activeElement);
+    var keepVisible = y <= header.offsetHeight + 12 || document.body.classList.contains('nav-open') || Boolean(header.querySelector(':focus-visible'));
     if (keepVisible) {
       header.classList.remove('is-hidden');
       scrollAnchor = y;
