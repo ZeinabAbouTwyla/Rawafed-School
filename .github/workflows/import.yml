@@ -1,0 +1,43 @@
+name: import-site
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download site archive from release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          ASSET=$(gh api repos/${{ github.repository }}/releases/tags/import --jq '.assets[0].name')
+          gh release download import --repo ${{ github.repository }} --pattern "$ASSET" --dir /tmp/import --clobber
+      - name: Extract and stage site files
+        run: |
+          set -e
+          mkdir -p /tmp/import/x
+          unzip -o /tmp/import/* -d /tmp/import/x
+          if [ -z "$(find /tmp/import/x -mindepth 1 -maxdepth 1 -type f -print -quit)" ] && [ "$(find /tmp/import/x -mindepth 1 -maxdepth 1 -type d | wc -l)" = "1" ]; then
+            SRC=$(find /tmp/import/x -mindepth 1 -maxdepth 1 -type d)
+          else
+            SRC=/tmp/import/x
+          fi
+          cp -r "$SRC"/. .
+      - name: Commit site files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "Import site files" || echo "nothing to commit"
+      - name: Remove import workflow and temporary release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          rm -f .github/workflows/import.yml
+          git add -A
+          git commit -m "Remove temporary import workflow" || echo "nothing to remove"
+          git push
+          gh release delete import --yes --cleanup-tag
