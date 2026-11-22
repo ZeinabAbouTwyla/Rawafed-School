@@ -46,9 +46,35 @@
     navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
   document.querySelectorAll('.main-nav a').forEach(function (a) {
-    a.addEventListener('click', function () { document.body.classList.remove('nav-open'); });
+    a.addEventListener('click', function () { document.body.classList.remove('nav-open'); navToggle.setAttribute('aria-expanded', 'false'); });
   });
   if (qs.get('nav') === 'open') { document.body.classList.add('nav-open'); navToggle.setAttribute('aria-expanded', 'true'); }
+
+  /* ---------- header scroll direction ---------- */
+  var header = document.querySelector('.site-header');
+  var scrollAnchor = Math.max(0, window.scrollY);
+  var scrollPending = false;
+  function updateHeader() {
+    var y = Math.max(0, window.scrollY);
+    var delta = y - scrollAnchor;
+    var keepVisible = y <= header.offsetHeight + 12 || document.body.classList.contains('nav-open') || header.contains(document.activeElement);
+    if (keepVisible) {
+      header.classList.remove('is-hidden');
+      scrollAnchor = y;
+    } else if (Math.abs(delta) >= 8) {
+      header.classList.toggle('is-hidden', delta > 0);
+      scrollAnchor = y;
+    }
+    scrollPending = false;
+  }
+  window.addEventListener('scroll', function () {
+    if (!scrollPending) { scrollPending = true; requestAnimationFrame(updateHeader); }
+  }, { passive: true });
+  header.addEventListener('focusin', function () { header.classList.remove('is-hidden'); });
+  navToggle.addEventListener('click', function () { header.classList.remove('is-hidden'); scrollAnchor = Math.max(0, window.scrollY); });
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') { document.body.classList.remove('nav-open'); navToggle.setAttribute('aria-expanded', 'false'); }
+  });
 
   /* ---------- teacher filters ---------- */
   var chips = document.querySelectorAll('#teacher-filters .chip');
